@@ -79,16 +79,6 @@ then
 	exit 1
 fi
 
-# If there is a bundle file, build a virtualenv from the
-# bundle we use for tox
-if [ -e ".cache.bundle" ]
-then
-    mv .cache.bundle .cache.pybundle
-    virtualenv --no-site-packages .venv
-    .venv/bin/pip install .cache.pybundle
-    rm .cache.pybundle
-fi
-
 VERSIONDIR="$HOME/versions"
 RECORDFILE="$VERSIONDIR/tarballversions"
 
@@ -109,9 +99,26 @@ SEPARATOR=${SEPARATOR:-'~'}
 
 rm -f dist/*.tar.gz
 if [ -f setup.py ] ; then
-    # swift has no virtualenv information in its tree.
-    if [ -d .venv -o -f tools/with_venv.sh ] ; then
+    # Try tox and cached bundles first
+    if [ -e ".cache.bundle" ] ; then
+        if [ -f tox.ini -a -f /usr/bin/tox ] ; then
+            if tox --showconfig | grep testenv | grep jenkinsvenv >/dev/null 2>&1
+            then
+                tox -ejenkinsvenv python setup.py sdist
+            else
+                tox -evenv python setup.py sdist
+            fi
+        else
+            rm -rf .venv
+            mv .cache.bundle .cache.pybundle
+            virtualenv --no-site-packages .venv
+            .venv/bin/pip install .cache.pybundle
+            rm .cache.pybundle
+        fi
+    # Try old style venv's second
+    elif [ -d .venv -a -f tools/with_venv.sh ] ; then
         tools/with_venv.sh python setup.py sdist
+    # Last but not least, just make a tarball
     else
         python setup.py sdist
     fi
