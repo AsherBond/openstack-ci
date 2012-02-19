@@ -24,3 +24,15 @@ else
 # This is needed for the keystone install for glance
   perl -MCwd -ple '$CWD=Cwd::abs_path();s,/.*/.venv/src/(.*),$CWD/.venv/src/$1,' -i .venv/bin/*
 fi
+if [ -f tools/test-requires ] ; then
+  TEST_REQUIRES='-r tools/test-requires'
+fi
+
+if [ -f tools/test-requires -a \
+    `git diff HEAD^1 tools/test-requires 2>/dev/null | wc -l` -gt 0 -o \
+    `git diff HEAD^1 tools/pip-requires 2>/dev/null | wc -l` -gt 0 ]
+then
+  rm -rf .venv
+  virtualenv --no-site-packages .venv
+  pip -E .venv install --upgrade -r tools/pip-requires $TEST_REQUIRES
+fi
