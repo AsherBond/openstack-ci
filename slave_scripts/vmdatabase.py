@@ -9,9 +9,9 @@ BUILDING=1
 # The machine is ready for use.
 READY=2
 # This can mean in-use, or used but complete.  We don't actually need to
-# distinguish between those states -- we'll just delete a machine 24 hours 
+# distinguish between those states -- we'll just delete a machine 24 hours
 # after it transitions into the USED state.
-USED=3  
+USED=3
 # An error state, should just try to delete it.
 ERROR=4
 
@@ -32,7 +32,7 @@ class VMDatabase(object):
         # but more importantly lets you manage transactions manually
         # without the isolation emulation getting in your way.
         # Most of our writes can be autocomitted, and the one(s)
-        # that can't, we'll set up the transaction around the critical 
+        # that can't, we'll set up the transaction around the critical
         # section.
         if not os.path.exists(path):
             conn = sqlite3.connect(path, isolation_level=None)
@@ -47,22 +47,22 @@ class VMDatabase(object):
         self.conn.row_factory = sqlite3.Row
 
     def addMachine(self, provider, mid, image, name, ip, uuid):
-        self.conn.execute("""insert into machines 
-                                 (provider, id, image, name, ip, 
-                                  uuid, state_time, state) 
+        self.conn.execute("""insert into machines
+                                 (provider, id, image, name, ip,
+                                  uuid, state_time, state)
                              values (?, ?, ?, ?, ?, ?, ?, ?)""",
                           (provider, mid, image, name, ip, uuid,
                            int(time.time()), BUILDING))
-          
+
     def delMachine(self, uuid):
         self.conn.execute("delete from machines where uuid=?", (uuid,))
 
     def setMachineUser(self, uuid, user):
-        self.conn.execute("update machines set user=? where uuid=?", 
+        self.conn.execute("update machines set user=? where uuid=?",
                           (user, uuid))
 
     def setMachineState(self, uuid, state):
-        self.conn.execute("""update machines set state=?, state_time=? 
+        self.conn.execute("""update machines set state=?, state_time=?
                              where uuid=?""",
                           (state, int(time.time()), uuid))
 

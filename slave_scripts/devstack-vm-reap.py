@@ -62,11 +62,11 @@ now = time.time()
 for machine in db.getMachines():
     # Normally, reap machines that have sat in their current state
     # for 24 hours, unless that state is READY.
-    if REAP_ALL or (machine['state']!=vmdatabase.READY and 
+    if REAP_ALL or (machine['state']!=vmdatabase.READY and
                     now-machine['state_time'] > MACHINE_LIFETIME):
         print 'Deleting', machine['name']
         delete(machine)
-        
+
 print
 print 'Known machines (end):'
 for machine in db.getMachines():

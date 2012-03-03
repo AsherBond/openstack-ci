@@ -144,7 +144,7 @@ for team_todo in teams_todo:
     else:
 
       user = dict(add_groups=[])
-      
+
     status = detail.status
     if (status == "Approved" or status == "Administrator"):
       user['add_groups'].append(team.name)
@@ -252,7 +252,7 @@ for (username, user_details) in users.items():
     # We need details
     member = launchpad.people[username]
     if not member.is_team:
-    
+
       openid_consumer = consumer.Consumer(dict(id=randomString(16, '0123456789abcdef')), None)
       openid_request = openid_consumer.begin("https://launchpad.net/~%s" % member.name)
       user_details['openid_external_id'] = openid_request.endpoint.getLocalID()
@@ -299,9 +299,9 @@ for (username, user_details) in users.items():
             if seq is None:
               seq = 1
             cur.execute("""insert into account_ssh_keys
-                            (ssh_public_key, valid, account_id, seq) 
+                            (ssh_public_key, valid, account_id, seq)
                             values
-                            (%s, 'Y', %s, %s)""", 
+                            (%s, 'Y', %s, %s)""",
                             (key.strip(), account_id, seq))
 
         # account_external_ids

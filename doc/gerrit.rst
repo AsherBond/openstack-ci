@@ -77,23 +77,23 @@ Install Gerrit
 ::
 
   wget http://gerrit.googlecode.com/files/gerrit-2.2.1.war
-  mv gerrit-2.2.1.war gerrit.war     
+  mv gerrit-2.2.1.war gerrit.war
   java -jar gerrit.war init -d review_site
 
 ::
 
   *** Gerrit Code Review 2.2.1
-  *** 
+  ***
 
-  Create '/home/gerrit2/review_site' [Y/n]? 
+  Create '/home/gerrit2/review_site' [Y/n]?
 
   *** Git Repositories
-  *** 
+  ***
 
-  Location of Git repositories   [git]: 
+  Location of Git repositories   [git]:
 
   *** SQL Database
-  *** 
+  ***
 
   Database server type           [H2/?]: ?
   Supported options are:
@@ -105,60 +105,60 @@ Install Gerrit
 
   Gerrit Code Review is not shipped with MySQL Connector/J 5.1.10
   **  This library is required for your configuration. **
-  Download and install it now [Y/n]? 
+  Download and install it now [Y/n]?
   Downloading http://repo2.maven.org/maven2/mysql/mysql-connector-java/5.1.10/mysql-connector-java-5.1.10.jar ... OK
   Checksum mysql-connector-java-5.1.10.jar OK
-  Server hostname                [localhost]: 
-  Server port                    [(MYSQL default)]: 
-  Database name                  [reviewdb]: 
-  Database username              [gerrit2]: 
-  gerrit2's password             : 
-  confirm password : 
+  Server hostname                [localhost]:
+  Server port                    [(MYSQL default)]:
+  Database name                  [reviewdb]:
+  Database username              [gerrit2]:
+  gerrit2's password             :
+  confirm password :
 
   *** User Authentication
-  *** 
+  ***
 
-  Authentication method          [OPENID/?]: 
+  Authentication method          [OPENID/?]:
 
   *** Email Delivery
-  *** 
+  ***
 
-  SMTP server hostname           [localhost]: 
-  SMTP server port               [(default)]: 
-  SMTP encryption                [NONE/?]: 
-  SMTP username                  : 
+  SMTP server hostname           [localhost]:
+  SMTP server port               [(default)]:
+  SMTP encryption                [NONE/?]:
+  SMTP username                  :
 
   *** Container Process
-  *** 
+  ***
 
-  Run as                         [gerrit2]: 
-  Java runtime                   [/usr/lib/jvm/java-6-openjdk/jre]: 
-  Copy gerrit.war to /home/gerrit2/review_site/bin/gerrit.war [Y/n]? 
+  Run as                         [gerrit2]:
+  Java runtime                   [/usr/lib/jvm/java-6-openjdk/jre]:
+  Copy gerrit.war to /home/gerrit2/review_site/bin/gerrit.war [Y/n]?
   Copying gerrit.war to /home/gerrit2/review_site/bin/gerrit.war
 
   *** SSH Daemon
-  *** 
+  ***
 
-  Listen on address              [*]: 
-  Listen on port                 [29418]: 
+  Listen on address              [*]:
+  Listen on port                 [29418]:
 
   Gerrit Code Review is not shipped with Bouncy Castle Crypto v144
   If available, Gerrit can take advantage of features
   in the library, but will also function without it.
-  Download and install it now [Y/n]? 
+  Download and install it now [Y/n]?
   Downloading http://www.bouncycastle.org/download/bcprov-jdk16-144.jar ... OK
   Checksum bcprov-jdk16-144.jar OK
   Generating SSH host key ... rsa... dsa... done
 
   *** HTTP Daemon
-  *** 
+  ***
 
   Behind reverse proxy           [y/N]? y
   Proxy uses SSL (https://)      [y/N]? y
-  Subdirectory on proxy server   [/]: 
-  Listen on address              [*]: 
-  Listen on port                 [8081]: 
-  Canonical URL                  [https://review.openstack.org/]: 
+  Subdirectory on proxy server   [/]:
+  Listen on address              [*]:
+  Listen on port                 [8081]:
+  Canonical URL                  [https://review.openstack.org/]:
 
   Initialized /home/gerrit2/review_site
   Executing /home/gerrit2/review_site/bin/gerrit.sh start
@@ -194,7 +194,7 @@ Add "Approved" review type to gerrit::
   mysql -u root -p
   use reviewdb;
   insert into approval_categories values ('Approved', 'A', 2, 'MaxNoBlock', 'N', 'APRV');
-  insert into approval_category_values values ('No score', 'APRV', 0);    
+  insert into approval_category_values values ('No score', 'APRV', 0);
   insert into approval_category_values values ('Approved', 'APRV', 1);
   update approval_category_values set name = "Looks good to me (core reviewer)" where name="Looks good to me, approved";
 
@@ -233,12 +233,12 @@ Generate an SSH key for Gerrit for use on GitHub
 ::
 
   sudo su - gerrit2
-  gerrit2@gerrit:~$ ssh-keygen        
+  gerrit2@gerrit:~$ ssh-keygen
   Generating public/private rsa key pair.
-  Enter file in which to save the key (/home/gerrit2/.ssh/id_rsa): 
+  Enter file in which to save the key (/home/gerrit2/.ssh/id_rsa):
   Created directory '/home/gerrit2/.ssh'.
-  Enter passphrase (empty for no passphrase): 
-  Enter same passphrase again: 
+  Enter passphrase (empty for no passphrase):
+  Enter same passphrase again:
 
 GitHub Configuration
 --------------------
@@ -390,7 +390,7 @@ Configure gerritbot, including which events should be announced::
   server=irc.freenode.net
   channel=openstack-dev
   port=6667
-  
+
   [gerrit]
   user=gerritbot
   key=/home/gerrit2/.ssh/gerritbot_rsa
@@ -429,15 +429,15 @@ Create a GPG and register it with Launchpad::
   gpg (GnuPG) 1.4.11; Copyright (C) 2010 Free Software Foundation, Inc.
   This is free software: you are free to change and redistribute it.
   There is NO WARRANTY, to the extent permitted by law.
-  
+
   Please select what kind of key you want:
      (1) RSA and RSA (default)
      (2) DSA and Elgamal
      (3) DSA (sign only)
      (4) RSA (sign only)
-  Your selection? 
+  Your selection?
   RSA keys may be between 1024 and 4096 bits long.
-  What keysize do you want? (2048) 
+  What keysize do you want? (2048)
   Requested keysize is 2048 bits
   Please specify how long the key should be valid.
            0 = key does not expire
@@ -445,37 +445,37 @@ Create a GPG and register it with Launchpad::
         <n>w = key expires in n weeks
         <n>m = key expires in n months
         <n>y = key expires in n years
-  Key is valid for? (0) 
+  Key is valid for? (0)
   Key does not expire at all
   Is this correct? (y/N) y
-  
+
   You need a user ID to identify your key; the software constructs the user ID
   from the Real Name, Comment and Email Address in this form:
       "Heinrich Heine (Der Dichter) <heinrichh@duesseldorf.de>"
-  
+
   Real name: Openstack Gerrit
   Email address: review@openstack.org
-  Comment: 
+  Comment:
   You selected this USER-ID:
       "Openstack Gerrit <review@openstack.org>"
-  
+
   Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? o
   You need a Passphrase to protect your secret key.
-  
+
   gpg: gpg-agent is not available in this session
   You don't want a passphrase - this is probably a *bad* idea!
   I will do it anyway.  You can change your passphrase at any time,
   using this program with the option "--edit-key".
-  
+
   We need to generate a lot of random bytes. It is a good idea to perform
   some other action (type on the keyboard, move the mouse, utilize the
   disks) during the prime generation; this gives the random number
   generator a better chance to gain enough entropy.
-  
+
   gpg: /home/gerrit2/.gnupg/trustdb.gpg: trustdb created
   gpg: key 382ACA7F marked as ultimately trusted
   public and secret key created and signed.
-  
+
   gpg: checking the trustdb
   gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
   gpg: depth: 0  valid:   1  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 1u
@@ -483,7 +483,7 @@ Create a GPG and register it with Launchpad::
           Key fingerprint = 21EF 7F30 C281 F61F 44CD  EC48 7424 9762 382A CA7F
   uid                  Openstack Gerrit <review@openstack.org>
   sub   2048R/95F6FA4A 2011-07-26
-  
+
   gerrit2@gerrit:~$ gpg --send-keys --keyserver keyserver.ubuntu.com 382ACA7F
   gpg: sending key 382ACA7F to hkp server keyserver.ubuntu.com
 
@@ -562,7 +562,7 @@ As a github openstack admin:
 
 Pull requests can not be disabled for a project in Github, so instead
 we have a script that runs from cron to close any open pull requests
-with instructions to use Gerrit.  
+with instructions to use Gerrit.
 
 * Edit openstack/openstack-ci-puppet:manifests/site.pp
 
@@ -621,13 +621,13 @@ Access Controls
 High level goals:
 
 #. Anonymous users can read all projects.
-#. All registered users can perform informational code review (+/-1) 
+#. All registered users can perform informational code review (+/-1)
    on any project.
 #. Jenkins can perform verification (blocking or approving: +/-1).
 #. All registered users can create changes.
 #. The OpenStack Release Manager and Jenkins can tag releases (push
    annotated tags).
-#. Members of $PROJECT-core group can perform full code review 
+#. Members of $PROJECT-core group can perform full code review
    (blocking or approving: +/- 2), and submit changes to be merged.
 #. Members of openstack-release (Release Manager and PTLs), and
    $PROJECT-drivers (PTL and release minded people) exclusively can
@@ -652,8 +652,8 @@ These permissions try to achieve the high level goals::
       read: anonymous
       push annotated tag: release managers, ci tools, project bootstrappers
       forge author identity: registered users
-      forge committer identity: project bootstrappers  
-      push (w/ force push): project bootstrappers  
+      forge committer identity: project bootstrappers
+      push (w/ force push): project bootstrappers
       create reference: project bootstrappers, release managers
       push merge commit: project bootstrappers
 
@@ -661,7 +661,7 @@ These permissions try to achieve the high level goals::
       push: registered users
 
     refs/heads/*
-      label code review: 
+      label code review:
         -1/+1: registered users
         -2/+2: project bootstrappers
       label verified:
@@ -670,7 +670,7 @@ These permissions try to achieve the high level goals::
       label approved 0/+1: project bootstrappers
       submit: ci tools
       submit: project bootstrappers
-    
+
     refs/heads/milestone-proposed
       label code review (exclusive):
         -2/+2 openstack-release
@@ -727,7 +727,7 @@ To rename a project:
      update account_project_watches
      set project_name = "openstack/OLD"
      where project_name = "openstack/NEW";
- 
+
      update changes
      set dest_project_name = "openstack/OLD"
      where dest_project_name = "openstack/NEW";

@@ -37,7 +37,7 @@ do
 	git clone https://review.openstack.org/p/$PROJECT
     fi
     cd $SHORT_PROJECT
-    
+
     BRANCH=$GERRIT_BRANCH
 
     # See if this project has this branch, if not, use master

@@ -87,7 +87,7 @@ for (group_name, group_id) in cur.fetchall():
     while len(groups_todo) > 0:
         current_group = groups_todo.pop()
         total_groups.append(current_group)
-        cur.execute("""select include_id from account_group_includes 
+        cur.execute("""select include_id from account_group_includes
                         where group_id = %s""", (current_group))
         for row in cur.fetchall():
             if row[0] != 1 and row[0] not in total_groups:

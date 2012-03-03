@@ -40,8 +40,8 @@ SERVER_NAME = os.environ.get('SERVER_NAME',
 IMAGE_NAME = os.environ.get('IMAGE_NAME', 'devstack-oneiric')
 DISTRIBUTION = 'oneiric'
 PROJECTS = ['openstack/nova',
-            'openstack/glance', 
-            'openstack/keystone', 
+            'openstack/glance',
+            'openstack/keystone',
             'openstack/python-novaclient',
             'openstack/python-keystoneclient',
             'openstack-dev/devstack',
@@ -100,7 +100,7 @@ for branch in git_branches():
     images = []
     for line in open(os.path.join(DEVSTACK, 'stackrc')):
         if line.startswith('IMAGE_URLS'):
-            if '#' in line: 
+            if '#' in line:
                 line = line[:line.rfind('#')]
             value = line.split('=', 1)[1].strip()
             if value[0]==value[-1]=='"':
@@ -112,7 +112,7 @@ for branch in git_branches():
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     Driver = get_driver(Provider.RACKSPACE)
     conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
-    
+
     print "Searching for %s server" % SERVER_NAME
     node = [n for n in conn.list_nodes() if n.name==SERVER_NAME][0]
 
@@ -154,11 +154,11 @@ ssh('upgrade server', 'sudo apt-get -y dist-upgrade')
 ssh('run puppet', 'sudo bash -c "cd /root/openstack-ci-puppet && /usr/bin/git pull -q && /var/lib/gems/1.8/bin/puppet apply -l /tmp/manifest.log --modulepath=/root/openstack-ci-puppet/modules manifests/site.pp"')
 
 for branch_data in BRANCHES:
-    ssh('cache debs for branch %s'%branch_data['name'], 
+    ssh('cache debs for branch %s'%branch_data['name'],
         'sudo apt-get -y -d install %s' % ' '.join(branch_data['debs']))
     venv = ssh('get temp dir for venv', 'mktemp -d').strip()
     ssh('create venv', 'virtualenv --no-site-packages %s' % venv)
-    ssh('cache pips for branch %s'%branch_data['name'], 
+    ssh('cache pips for branch %s'%branch_data['name'],
         'source %s/bin/activate && PIP_DOWNLOAD_CACHE=~/cache/pip pip install %s' % (venv, ' '.join(branch_data['pips'])))
     ssh('remove venv', 'rm -fr %s'%venv)
     for url in branch_data['images']:
@@ -194,7 +194,7 @@ image = conn.ex_save_image(node=node, name=IMAGE_NAME)
 last_extra = None
 okay = False
 while True:
-    image = [img for img in conn.list_images(ex_only_active=False) 
+    image = [img for img in conn.list_images(ex_only_active=False)
              if img.name==IMAGE_NAME][0]
     if image.extra != last_extra:
         print image.extra['status'], image.extra['progress']

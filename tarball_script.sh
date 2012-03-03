@@ -43,7 +43,7 @@ find_next_version() {
 
     printf "%s" "$version"
 }
-    
+
 if [ "$1" = "test" ]
 then
     PROJECT="testproj"
@@ -53,7 +53,7 @@ then
     BRANCH=foo
     revno="99923"
     REVNOPREFIX="r"
-    
+
     # Verify that we skip already built versions
     echo "d2" > "${MILESTONEDIR}/$PROJECT-${BRANCH}"
     echo "$PROJECT d2~$datestamp.001" > $RECORDFILE
@@ -79,13 +79,13 @@ then
 	exit 1
 fi
 
-# If there is a bundle file, build a virtualenv from the 
+# If there is a bundle file, build a virtualenv from the
 # bundle we use for tox
 if [ -e ".cache.bundle" ]
 then
     mv .cache.bundle .cache.pybundle
     virtualenv --no-site-packages .venv
-    .venv/bin/pip install .cache.pybundle 
+    .venv/bin/pip install .cache.pybundle
     rm .cache.pybundle
 fi
 

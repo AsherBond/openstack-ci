@@ -14,7 +14,7 @@
 # under the License.
 
 # This is designed to be called by a gerrit hook.  It searched new
-# patchsets for strings like "blueprint FOO" or "bp FOO" and updates 
+# patchsets for strings like "blueprint FOO" or "bp FOO" and updates
 # corresponding Launchpad blueprints with links back to the change.
 
 from launchpadlib.launchpad import Launchpad
@@ -78,7 +78,7 @@ def update_spec(launchpad, project, name, subject, link, topic=None):
                                             topic)
         if topiclink not in wb:
             wb += "\n\n\nGerrit topic: %(link)s" % dict(link=topiclink)
-            changed = True                                               
+            changed = True
 
     if link not in wb:
         wb += "\n\n\nAddressed by: %(link)s\n    %(subject)s\n" % dict(subject=subject,
@@ -90,9 +90,9 @@ def update_spec(launchpad, project, name, subject, link, topic=None):
         spec.lp_save()
 
 def find_specs(launchpad, dbconn, args):
-    git_log = subprocess.Popen(['git', 
-                                '--git-dir=' + BASE_DIR + '/git/' + args.project + '.git', 
-                                'log', '--no-merges', 
+    git_log = subprocess.Popen(['git',
+                                '--git-dir=' + BASE_DIR + '/git/' + args.project + '.git',
+                                'log', '--no-merges',
                                 args.commit + '^1..' + args.commit],
                                stdout=subprocess.PIPE).communicate()[0]
 
@@ -106,7 +106,7 @@ def find_specs(launchpad, dbconn, args):
         specs |= set([topicspec])
 
     for spec in specs:
-        update_spec(launchpad, args.project, spec, subject, 
+        update_spec(launchpad, args.project, spec, subject,
                     args.change_url, topic)
 
 def main():

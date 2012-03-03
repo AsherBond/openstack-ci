@@ -107,7 +107,7 @@ class LaunchpadAction(object):
     for sub_team in self.launchpad.people[team].sub_teams:
       sub_teams.append(sub_team.name)
     return sub_teams
-    
+
   def get_teams(self):
     return self.lp_teams
 
@@ -121,7 +121,7 @@ class LaunchpadAction(object):
           if ((users.count(name) == 0) and (name not in self.lp_teams)):
             users.append(name)
     return users
-      
+
   def get_user_data(self, user):
     return self.launchpad.people[user]
 
@@ -135,7 +135,7 @@ class LaunchpadAction(object):
           # check subteam for implied subteams
           for implied_group in gerrit.get_implied_groups(name):
             if implied_group in self.lp_teams:
-              users.extend(self.get_team_members(implied_group, gerrit))  
+              users.extend(self.get_team_members(implied_group, gerrit))
           users.extend(self.get_team_members(name, gerrit))
           continue
         users.append(name)
