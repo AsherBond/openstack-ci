@@ -26,6 +26,7 @@ do
     pip bundle .cache.bundle -r tools/pip-requires
   fi
   tar cvfz jenkins_venvs/$branch/venv.tgz .venv .cache.bundle
-  rm -fr .venv .cache.bundle
+  rm -fr .venv
+  mv .cache.bundle jenkins_venvs/$branch/
 done
 git checkout master
