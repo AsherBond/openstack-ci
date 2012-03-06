@@ -392,3 +392,5 @@ for (username, user_details) in users.items():
 
 os.system("ssh -i %s -p29418 %s@localhost gerrit flush-caches" %
           (GERRIT_SSH_KEY, GERRIT_USER))
+
+conn.commit()
