@@ -1,5 +1,10 @@
 #!/bin/bash -xe
 
+if [ -n "$GERRIT_REFNAME" ]
+then
+  GERRIT_BRANCH=$GERRIT_REFNAME
+fi
+
 # Support jobs, such as nova-docs, which are not yet triggered by gerrit
 if [ "x$GERRIT_BRANCH" = "x" ] ; then
   GERRIT_BRANCH=master
