@@ -19,8 +19,6 @@ case "$GERRIT_REFNAME" in
 esac
 
 HUDSON=http://localhost:8080/
-VERSIONDIR=$HOME/versions
-PKGRECORDFILE=$VERSIONDIR/pkgversions
 # We keep packaging for openstack trunk in lp:~o-u-p/$project/ubuntu
 # For a release (diablo, essex), it's in lp:~o-u-p/$project/$release
 OPENSTACK_RELEASE=${OPENSTACK_RELEASE:-ubuntu}
@@ -28,13 +26,6 @@ BZR_BRANCH=${BZR_BRANCH:-lp:~openstack-ubuntu-packagers/$PROJECT/${OPENSTACK_REL
 PPAS=${PPAS:-ppa:$PROJECT-core/trunk}
 PACKAGING_REVNO=${PACKAGING_REVNO:--1}
 series=${series:-lucid}
-
-if [ ! -d "$VERSIONDIR" ]
-then
-        bzr co bzr://jenkins.openstack.org/ "$VERSIONDIR"
-else
-        ( cd $VERSIONDIR ; bzr up )
-fi
 
 cd build
 
@@ -74,23 +65,7 @@ export DEBFULLNAME="Soren Hansen"
 export DEBEMAIL="soren@openstack.org"
 
 buildno=1
-while true
-do
-	pkgversion="${version}-0ubuntu0ppa1~${series}${buildno}"
-	if grep "$PROJECT $pkgversion" "$PKGRECORDFILE"
-	then
-		echo "We've already built a $pkgversion of $PROJECT. Incrementing build number."
-		buildno=$(($buildno + 1))
-	else
-		echo "$PROJECT $pkgversion" >> "$PKGRECORDFILE"
-		sort "$PKGRECORDFILE" > "$PKGRECORDFILE".tmp
-                mv "$PKGRECORDFILE".tmp "$PKGRECORDFILE"
-		( cd $VERSIONDIR ;
-		 bzr up ;
-		 bzr commit -m"Added $PROJECT $snapshotversion" )
-		break
-	fi
-done
+pkgversion="${version}-0ubuntu0ppa1~${series}${buildno}"
 dch -b --force-distribution --v "${pkgversion}" "Automated PPA build. Packaging revision: ${PACKAGING_REVNO}." -D $series
 dpkg-buildpackage -rfakeroot -S -sa -nc -k32EE128C
 if ! [ "$DO_UPLOAD" = "no" ]
