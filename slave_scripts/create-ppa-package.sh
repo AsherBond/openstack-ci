@@ -64,7 +64,7 @@ fi
 export DEBFULLNAME="Soren Hansen"
 export DEBEMAIL="soren@openstack.org"
 
-buildno=1
+buildno=$BUILD_NUMBER
 pkgversion="${version}-0ubuntu0ppa1~${series}${buildno}"
 dch -b --force-distribution --v "${pkgversion}" "Automated PPA build. Packaging revision: ${PACKAGING_REVNO}." -D $series
 dpkg-buildpackage -rfakeroot -S -sa -nc -k32EE128C
