@@ -14,10 +14,16 @@ do
     echo "Building venv for $branch"
     git checkout $branch
     mkdir -p jenkins_venvs/$branch
-    if [ -f tools/test-requires ] ; then
-        pip bundle jenkins_venvs/$branch/.cache.bundle -r tools/pip-requires -r tools/test-requires
+    bundle=jenkins_venvs/$branch/.cache.bundle
+
+    if [ -f tools/pip-requires ] ; then
+        if [ -f tools/test-requires ] ; then
+            pip bundle $bundle -r tools/pip-requires -r tools/test-requires
+        else
+            pip bundle $bundle -r tools/pip-requires
+        fi
     else
-        pip bundle jenkins_venvs/$branch/.cache.bundle -r tools/pip-requires
+        pip bundle $bundle distribute openstack.nose_plugin
     fi
 done
 git checkout master
