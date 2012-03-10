@@ -107,6 +107,7 @@ def git2lp(full_project_name):
         'openstack/python-novaclient': 'nova',
         'openstack/python-quantumclient': 'quantum',
         'openstack/openstack-ci-puppet': 'openstack-ci',
+        'openstack-ci/devstack-gate': 'openstack-ci',
         }
     return project_map.get(full_project_name, short_project(full_project_name))
 
