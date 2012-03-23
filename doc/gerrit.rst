@@ -38,28 +38,22 @@ This sets the host up with the standard OpenStack system
 administration configuration.  Skip this if you're not setting up a
 host for use by the OpenStack project.
 
-::
+.. code-block:: bash
 
-  apt-get install bzr puppet emacs23-nox
-  bzr branch lp:~mordred/+junk/osapuppetconf
-  cd osapuppetconf/
-  puppet apply --modulepath=`pwd`/modules manifests/site.pp
-
-This sets up the firewall and installs some dependencies for Gerrit::
-
-  apt-get install ufw
-  ufw enable
-  ufw allow from any to any port 22
-  ufw allow from any to any port 29418
-  ufw allow from any to any port 80
-  ufw allow from any to any port 443
-  apt-get install git openjdk-6-jre-headless mysql-server
+  sudo apt-get install puppet git openjdk-6-jre-headless mysql-server
+  git clone git://github.com/openstack/openstack-ci-puppet.git
+  cd openstack-ci-puppet/
+  sudo puppet apply --modulepath=modules manifests/site.pp
 
 Install MySQL
 -------------
-::
+You should setup MySQL as follows, changing 'secret' to a suitable password:
+
+.. code-block:: bash
 
   mysql -u root -p
+
+.. code-block:: mysql
 
   CREATE USER 'gerrit2'@'localhost' IDENTIFIED BY 'secret';
   CREATE DATABASE reviewdb;
@@ -67,20 +61,36 @@ Install MySQL
   GRANT ALL ON reviewdb.* TO 'gerrit2'@'localhost';
   FLUSH PRIVILEGES;
 
-  sudo useradd -r gerrit2
+Then create the gerrit2 system user as follows:
+
+.. code-block:: bash
+
+  sudo useradd -mr gerrit2
   sudo chsh gerrit2 -s /bin/bash
   sudo su - gerrit2
 
+With Gerrit 2.2.2 onwards edit /etc/mysql/my.cnf with the following:
+
+.. code-block:: ini
+
+   [mysqld]
+   default-storage-engine=INNODB
 
 Install Gerrit
 --------------
-::
+
+Note that Openstack's gerrit installation currently uses a custom .war of gerrit
+2.2.2.  The following instruction is for the generic gerrit binaries:
+
+.. code-block:: bash
 
   wget http://gerrit.googlecode.com/files/gerrit-2.2.1.war
   mv gerrit-2.2.1.war gerrit.war
   java -jar gerrit.war init -d review_site
 
-::
+The .war file will bring up an interactive tool to change the settings, these
+should be set as follows. Note that the password configured earlier for MySQL
+should be provided when prompted::
 
   *** Gerrit Code Review 2.2.1
   ***
@@ -170,26 +180,26 @@ Install Gerrit
 Configure Gerrit
 ----------------
 
-Update etc/gerrit.config::
+The file /home/gerrit2/review_site/etc/gerrit.config will be setup automatically
+by puppet.
 
-  [user]
-    email = review@openstack.org
-  [auth]
-    allowedOpenID = ^https?://(login.)?launchpad.net/.*$
-  [commentlink "launchpad"]
-    match = "([Bb]ug\\s+#?)(\\d+)"
-    link = https://code.launchpad.net/bugs/$2
+Set Gerrit to start on boot:
 
-Set Gerrit to start on boot::
+.. code-block:: bash
 
   ln -snf /home/gerrit2/review_site/bin/gerrit.sh /etc/init.d/gerrit
   update-rc.d gerrit defaults 90 10
 
-  cat <<EOF >/etc/default/gerritcodereview
-  GERRIT_SITE=/home/gerrit2/review_site
-  EOF
+Then create the file ``/etc/default/gerritcodereview`` with the following
+contents:
 
-Add "Approved" review type to gerrit::
+.. code-block:: ini
+
+  GERRIT_SITE=/home/gerrit2/review_site
+
+Add "Approved" review type to gerrit:
+
+.. code-block:: mysql
 
   mysql -u root -p
   use reviewdb;
@@ -204,9 +214,70 @@ Install Apache
 
   apt-get install apache2
 
-create: /etc/apache2/sites-available/gerrit
+Create: /etc/apache2/sites-available/gerrit:
 
-::
+.. code-block:: apacheconf
+
+  <VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+  
+    ErrorLog ${APACHE_LOG_DIR}/gerrit-error.log
+  
+    LogLevel warn
+  
+    CustomLog ${APACHE_LOG_DIR}/gerrit-access.log combined
+  
+    Redirect / https://review-dev.openstack.org/
+  
+  </VirtualHost>
+  
+  <IfModule mod_ssl.c>
+  <VirtualHost _default_:443>
+    ServerAdmin webmaster@localhost
+  
+    ErrorLog ${APACHE_LOG_DIR}/gerrit-ssl-error.log
+  
+    LogLevel warn
+  
+    CustomLog ${APACHE_LOG_DIR}/gerrit-ssl-access.log combined
+  
+    SSLEngine on
+  
+    SSLCertificateFile    /etc/ssl/certs/ssl-cert-snakeoil.pem
+    SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
+    #SSLCertificateChainFile /etc/apache2/ssl.crt/server-ca.crt
+  
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
+    <Directory /usr/lib/cgi-bin>
+        SSLOptions +StdEnvVars
+    </Directory>
+  
+    BrowserMatch "MSIE [2-6]" \
+        nokeepalive ssl-unclean-shutdown \
+        downgrade-1.0 force-response-1.0
+    # MSIE 7 and newer should be able to use keepalive
+    BrowserMatch "MSIE [17-9]" ssl-unclean-shutdown
+  
+    RewriteEngine on
+    RewriteCond %{HTTP_HOST} !review-dev.openstack.org
+    RewriteRule ^.*$ https://review-dev.openstack.org/
+  
+        ProxyPassReverse / http://localhost:8081/
+        <Location />
+          Order allow,deny
+          Allow from all
+          ProxyPass http://localhost:8081/ retry=0
+        </Location>
+  
+  
+  </VirtualHost>
+  </IfModule>
+
+Run the following commands:
+
+.. code-block:: bash
 
   a2enmod ssl proxy proxy_http rewrite
   a2ensite gerrit
@@ -259,14 +330,28 @@ GitHub Configuration
   Warning: Permanently added 'github.com,207.97.227.239' (RSA) to the list of known hosts.
   PTY allocation request failed on channel 0
 
+You will also need to create the file ``github.secure.config`` in the gerrit2 user's home directory.  The contents of this are as follows:
+
+.. code-block:: ini
+
+  [github]
+  username = guthub-user
+  api_token = hexstring
+
+The username should be the github username for gerrit to use when communicating
+with github.  The api_token can be found in github's account setting for the
+account.
+
 Gerrit Replication to GitHub
 ----------------------------
-::
 
-  cat <<EOF >review_site/etc/replication.config
+The file ``review_site/etc/replication.config`` is needed with the following
+contents:
+
+.. code-block:: ini
+
   [remote "github"]
-  url = git@github.com:\$\{name\}.git
-  EOF
+  url = git@github.com:${name}.git
 
 Jenkins / Gerrit Integration
 ============================
@@ -381,9 +466,11 @@ As a Gerrit admin, create a user for gerritbot::
 
   cat ~gerrit2/.ssh/gerritbot_rsa | ssh -p29418 gerrit.openstack.org gerrit create-account --ssh-key - --full-name GerritBot gerritbot
 
-Configure gerritbot, including which events should be announced::
+Configure gerritbot, including which events should be announced in the
+gerritbot.config file:
 
-  cat <<EOF >~gerrit2/gerritbot.config
+.. code-block:: ini
+
   [ircbot]
   nick=NICNAME
   pass=PASSWORD
@@ -397,7 +484,6 @@ Configure gerritbot, including which events should be announced::
   host=review.openstack.org
   port=29418
   events=patchset-created, change-merged, x-vrif-minus-1, x-crvw-minus-2
-  EOF
 
 Register an account with NickServ on FreeNode, and put the account and
 password in the config file.
