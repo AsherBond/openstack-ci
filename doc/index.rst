@@ -26,6 +26,7 @@ Contents:
    jenkins
    gerrit
    puppet
+   puppet_modules
 
 Indices and tables
 ==================
