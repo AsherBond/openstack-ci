@@ -208,6 +208,37 @@ Add "Approved" review type to gerrit:
   insert into approval_category_values values ('Approved', 'APRV', 1);
   update approval_category_values set name = "Looks good to me (core reviewer)" where name="Looks good to me, approved";
 
+OpenStack currently uses a hybrid approach for CLA enforcement.  We
+use Gerrit's built in CLA system to ensure that contributors have
+signed the CLA, but contributors don't actually use Gerrit to sign it.
+Instead, developers use an external service (Echosign) to agree to the
+CLA, and then request membership in a Launchpad group called
+"openstack-cla".  The moderators of that group (core members of any
+OpenStack project) approve membership requests after verifying that
+new contributors have signed the CLA at Echosign.  The openstack-cla
+group is kept synchronized with Gerrit.  Gerrit is then configured
+with a "dummy" CLA (which users are not expected to see), and the
+administrator indicates to Gerrit that the entire openstack-cla group
+has agreed to the CLA.  This lets Gerrit enforce that the CLA has been
+signed while the actual facility to sign it in Gerrit is disabled via
+a source patch.
+
+This configuration is not recommended for new projects and is merely
+an artifact of legal requirements placed on the OpenStack project.
+Here are the SQL commands to set it up:
+
+.. code-block:: mysql
+
+  insert into contributor_agreement_id values (NULL);
+  insert into contributor_agreements values ('Y', 'N', 'N', 'CLA (Echosign)',
+  'OpenStack CLA via Echosign', 'static/echosign-cla.html', 1);
+
+  insert into account_group_agreements values (
+  now(), 'V', 1, now(), NULL, 
+  (select group_id from account_group_names where name='openstack-cla'),
+  1);
+
+
 Install Apache
 --------------
 ::
