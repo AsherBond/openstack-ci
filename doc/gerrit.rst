@@ -873,6 +873,28 @@ To rename a project:
 Developers will either need to re-clone a new copy of the repository,
 or manually update their remotes.
 
+Deleting a User from Gerrit
+***************************
+
+This isn't normally necessary, but if you find that you need to
+completely delete an account from Gerrit, here's how:
+
+.. code-block:: mysql
+
+  delete from account_agreements where account_id=NNNN;
+  delete from account_diff_preferences where id=NNNN;
+  delete from account_external_ids where account_id=NNNN;
+  delete from account_group_members where account_id=NNNN;
+  delete from account_group_members_audit where account_id=NNNN;
+  delete from account_patch_reviews where account_id=NNNN;
+  delete from account_project_watches where account_id=NNNN;
+  delete from account_ssh_keys where account_id=NNNN;
+  delete from accounts where account_id=NNNN;
+
+.. code-block:: bash
+
+  ssh review.openstack.org -p29418 gerrit flush-caches --all
+
 Adding A New Project On The Command Line
 ****************************************
 
