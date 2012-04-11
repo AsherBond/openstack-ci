@@ -384,11 +384,6 @@ for (username, user_details) in users.items():
       cur.execute("""delete from account_group_members
                      where account_id = %s and group_id = %s""",
                   (account_id, group_id))
-      os_project_name = "openstack/%s" % group_name
-      if os_project_name in projects:
-        cur.execute("""delete from account_project_watches
-                        where account_id=%s and project_name=%s""",
-                    (account_id, os_project_name))
 
 os.system("ssh -i %s -p29418 %s@localhost gerrit flush-caches" %
           (GERRIT_SSH_KEY, GERRIT_USER))
