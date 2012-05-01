@@ -17,6 +17,14 @@ OpenStack developers or users do not need to read this documentation.
 Instead, see http://wiki.openstack.org/ to learn how contribute to or
 use OpenStack.
 
+Howtos:
+
+.. toctree::
+   :maxdepth: 2
+
+   third_party
+   stackforge
+
 Contents:
 
 .. toctree::

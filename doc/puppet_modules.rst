@@ -12,7 +12,7 @@ document.
 Doc Server
 ----------
 
-The doc_server module configures nginx [4]_ to serve the documentation for
+The doc_server module configures nginx [3]_ to serve the documentation for
 several specified OpenStack projects.  At the moment to add a site to this
 you need to edit ``modules/doc_server/manifests/init.pp`` and add a line as
 follows:
@@ -30,11 +30,14 @@ Lodgeit
 -------
 
 The lodgeit module installs and configures lodgeit [1]_ on required servers to
-be used as paste installations.  For OpenStack we use a fork of this maintained
-by dcolish [2]_ which contains bug fixes necessary for us to use it.
+be used as paste installations.  For OpenStack we use
+`a fork <https://github.com/openstack-ci/lodgeit>`_ of this which is based on
+one with bugfixes maintained by
+`dcolish <https://bitbucket.org/dcolish/lodgeit-main>`_ but adds back missing
+anti-spam features required by Openstack.
 
-Puppet will configure lodgeit to use drizzle [3]_ as a database backend,
-nginx [4]_ as a front-end proxy and upstart scripts to run the lodgeit
+Puppet will configure lodgeit to use drizzle [2]_ as a database backend,
+nginx [3]_ as a front-end proxy and upstart scripts to run the lodgeit
 instances.  It will store and maintain local branch of the the mercurial
 repository for lodgeit in ``/tmp/lodgeit-main``.
 
@@ -85,11 +88,11 @@ The lodgeit module will automatically create a git repository in ``/var/backups/
 Planet
 ------
 
-The planet module installs Planet Venus [5]_ along with required dependancies
+The planet module installs Planet Venus [4]_ along with required dependancies
 on a server.  It also configures specified planets based on options given.
 
 Planet Venus works by having a cron job which creates static files.  In this
-module the static files are served using nginx [4]_.
+module the static files are served using nginx [3]_.
 
 To use this module you need to add something similar to the following into the
 main ``site.pp`` manifest:
@@ -114,6 +117,49 @@ This module will also create a cron job to pull new feed data 3 minutes past eac
 
 The ``git_url`` parameter needs to point to a git repository which stores the
 planet.ini configuration for the planet (which stores a list of feeds) and any required theme data.  This will be pulled every time puppet is run.
+
+Meetbot
+-------
+
+The meetbot module installs and configures meetbot [5]_ on a server.  The
+meetbot version installed by this module is pulled from the
+`Openstack CI fork <https://github.com/openstack-ci/meetbot/>`_ of the project.
+
+It also configures nginix [3]_ to be used for accessing the public IRC logs of
+the meetings.
+
+To use this module simply add a section to the site manifest as follows:
+
+.. code-block:: ruby
+   :linenos:
+
+   node "eavesdrop.openstack.org" {
+     include openstack_cron
+     class { 'openstack_server':
+       iptables_public_tcp_ports => [80]
+     }
+     include meetbot
+
+     meetbot::site { "openstack":
+       nick => "openstack",
+       network => "FreeNode",
+       server => "chat.us.freenode.net:7000",
+       url => "eavesdrop.openstack.org",
+       channels => "#openstack #openstack-dev #openstack-meeting",
+       use_ssl => "True"
+     }
+   }
+
+You will also need a file ``/root/secret-files/name-nickserv.pass`` where `name`
+is the name specified in the call to the module (`openstack` in this case).
+
+Each call to meetbot::site will create setup a meebot in ``/var/lib/meetbot``
+under a subdirectory of the name of the call to the module.  It will also
+configure nginix to go to that site when the ``/meetings`` directory is
+specified on the URL.
+
+The puppet module also creates startup scripts for meetbot and will ensure that
+it is running on each puppet run.
 
 Gerrit
 ------
@@ -227,14 +273,19 @@ The Jenkins Jobs puppet module uses configures a standard set of Jenkins jobs
 for a given project using a batch of building blocks.  The standard jobs
 created by this are:
 
-* coverage
+*Generic Jobs*
+
 * docs
-* merge
-* pep8
+* gate-merge
 * ppa
-* python26
-* python27
 * tarball
+
+*Python Jobs*
+
+* coverage
+* gate-pep8
+* gate-python26
+* gate-python27
 * venv
 
 These will be created prepended with the project name and a dash.
@@ -247,19 +298,47 @@ the Jenkins node:
 
 .. code-block:: ruby
 
-   class { "jenkins_jobs":
+   jenkins_jobs::generic_jobs { "python-openstackclient":
      site => "openstack",
-     projects => ["project1", "project2"]
+     project => "python-openstackclient",
+     node_group => "oneiric"
+   }
+   jenkins_jobs::python_jobs { "python-openstackclient":
+     site => "openstack",
+     project => "python-openstackclient",
+     node_group => "oneiric"
    }
 
-The ``site`` parameter is mainly used for git URLs and the ``projects``
-parameter should be a list of projects the module maintains the jobs for.
+The ``site`` parameter is mainly used for git URLs and the ``project``
+parameter should be the name of project the set of jobs are for.  Finally the
+``node_group`` parameter should be the name of the nodes this set of jobs should
+use as a builder.
+
+If you are creating multiple sets of jobs for different node groups or sites
+each should be given a unique name.
+
+It is also possible to add jobs individually rather than groups of jobs as
+follows:
+
+.. code-block:: ruby
+   :linenos:
+
+   jenkins_jobs::jobs::python26_gate { 'my_project':
+     site => 'openstack',
+     project => 'my_project',
+     node_group => 'natty',
+     trigger_branches => [['my_project', '**']]
+   }
+
+As can be seen here, ``trigger_branches`` is an array of branches and triggers
+to trigger on.
 
 Editing a Job
 ^^^^^^^^^^^^^
 
-The list of Jenkins jobs is stored in ``modules/jenkins_jobs/add_jobs.pp``.
-This file determines which templates should be pulled together to make the
+The Jenkins jobs are stored in ``modules/jenkins_jobs/jobs`` with collections in
+``modules/jenkins_jobs/jobs/*_jobs.pp``.
+These files determine which templates should be pulled together to make the
 job.  It will then automaticaly combine the building blocks to create an XML
 file for Jenkins.
 
@@ -271,25 +350,27 @@ An example job can be seen below:
 
 .. code-block:: ruby
 
-  jenkins_jobs::job { "${name}-coverage":
-    site => "${site}",
-    project => "${name}",
-    job => "coverage",
-    logrotate => template("jenkins_jobs/logrotate.xml.erb"),
-    builders => [template("jenkins_jobs/builder_copy_bundle.xml.erb"), template("jenkins_jobs/builder_coverage.xml.erb")],
-    publishers => template("jenkins_jobs/publisher_coverage.xml.erb"),
-    triggers => template("jenkins_jobs/trigger_timed_15mins.xml.erb"),
-    scm => template("jenkins_jobs/scm_git.xml.erb")
-  }
+   define jenkins_jobs::jobs::coverage($site, $project, $node_group) {
+     jenkins_jobs::build_job { "${name}-coverage":
+       site => $site,
+       project => $project,
+       job => "coverage",
+       node_group => $node_group,
+       logrotate => misc("logrotate"),
+       builders => [builder("copy_bundle"), builder("coverage")],
+       publishers => publisher("coverage"),
+       triggers => trigger("timed_15mins"),
+       scm => scm("git")
+     }
+   }
 
 The templates can be singles or in arrays to chain multiple things together,
 but the XML will be built in the order of the items array.  So in this case
 the builder ``builder_copy_bundle`` will be added, then ``builder_coverage``.
 
-
 .. rubric:: Footnotes
 .. [1] `Lodgeit homepage <http://www.pocoo.org/projects/lodgeit/>`_
-.. [2] `dcolish's Lodgeit fork <https://bitbucket.org/dcolish/lodgeit-main>`_
-.. [3] `Drizzle homepage <http://www.dirzzle.org/>`_
-.. [4] `nginx homepage <http://nginx.org/en/>`_
-.. [5] `Planet Venus <http://intertwingly.net/code/venus/docs/index.html>`_
+.. [2] `Drizzle homepage <http://www.dirzzle.org/>`_
+.. [3] `nginx homepage <http://nginx.org/en/>`_
+.. [4] `Planet Venus homepage <http://intertwingly.net/code/venus/docs/index.html>`_
+.. [5] `Meetbot homepage <http://wiki.debian.org/MeetBot>`_
