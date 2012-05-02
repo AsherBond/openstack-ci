@@ -118,6 +118,8 @@ This module will also create a cron job to pull new feed data 3 minutes past eac
 The ``git_url`` parameter needs to point to a git repository which stores the
 planet.ini configuration for the planet (which stores a list of feeds) and any required theme data.  This will be pulled every time puppet is run.
 
+.. _Meetbot_Puppet_Module:
+
 Meetbot
 -------
 

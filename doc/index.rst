@@ -35,6 +35,7 @@ Contents:
    gerrit
    puppet
    puppet_modules
+   meetbot
 
 Indices and tables
 ==================
