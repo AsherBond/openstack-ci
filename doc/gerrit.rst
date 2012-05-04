@@ -208,6 +208,33 @@ Add "Approved" review type to gerrit:
   insert into approval_category_values values ('Approved', 'APRV', 1);
   update approval_category_values set name = "Looks good to me (core reviewer)" where name="Looks good to me, approved";
 
+Expand "Verified" review type to -2/+2:
+
+.. code-block:: mysql
+
+  mysql -u root -p
+  use reviewdb;
+  update approval_category_values set value=2
+    where value=1 and category_id='VRIF';
+  update approval_category_values set value=-2
+    where value=-1 and category_id='VRIF';
+  insert into approval_category_values values
+    ("Doesn't seem to work","VRIF",-1),
+    ("Works for me","VRIF","1");
+
+Reword the default messages that use the word Submit, as they imply that
+we're not happy with people for submitting the patch in the first place:
+
+.. code-block:: mysql
+
+  mysql -u root -p
+  use reviewdb;
+  update approval_category_values set name="Do not merge"
+    where category_id='CRVW' and value=-2;
+  update approval_category_values
+    set name="I would prefer that you didn't merge this"
+    where category_id='CRVW' and value=-1;
+
 OpenStack currently uses a hybrid approach for CLA enforcement.  We
 use Gerrit's built in CLA system to ensure that contributors have
 signed the CLA, but contributors don't actually use Gerrit to sign it.
@@ -782,8 +809,9 @@ These permissions try to achieve the high level goals::
         -1/+1: registered users
         -2/+2: project bootstrappers
       label verified:
-        -1/+1: ci tools
-        -1/+1: project bootstrappers
+        -2/+2: ci tools
+        -2/+2: project bootstrappers
+        -1/+1: external tools
       label approved 0/+1: project bootstrappers
       submit: ci tools
       submit: project bootstrappers
