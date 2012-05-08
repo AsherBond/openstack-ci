@@ -372,7 +372,7 @@ the builder ``builder_copy_bundle`` will be added, then ``builder_coverage``.
 
 .. rubric:: Footnotes
 .. [1] `Lodgeit homepage <http://www.pocoo.org/projects/lodgeit/>`_
-.. [2] `Drizzle homepage <http://www.dirzzle.org/>`_
+.. [2] `Drizzle homepage <http://www.drizzle.org/>`_
 .. [3] `nginx homepage <http://nginx.org/en/>`_
 .. [4] `Planet Venus homepage <http://intertwingly.net/code/venus/docs/index.html>`_
 .. [5] `Meetbot homepage <http://wiki.debian.org/MeetBot>`_
