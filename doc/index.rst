@@ -35,6 +35,7 @@ Contents:
    gerrit
    puppet
    puppet_modules
+   jenkins_jobs
    meetbot
 
 Indices and tables
